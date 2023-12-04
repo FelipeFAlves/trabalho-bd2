@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model brandings {
+  id          String   @id
+  title       String
+  description String
+  keywords    String[]
+}
+
+model channels {
+  id              String      @id
+  title           String
+  description     String
+  customUrl       String
+  publishedAt     DateTime
+  viewCount       BigInt
+  subscriberCount BigInt
+  playlists       playlists[]
+  videos          videos[]
+}
+
+model comments {
+  id                    String   @id
+  channelId             String
+  videoId               String
+  topLevelCommentId     String?
+  textDisplay           String
+  textOriginal          String
+  authorNameDisplay     String
+  authorProfileImageUrl String
+  authorChannelUrl      String
+  canRate               Boolean
+  viewerRating          Int
+  likeCount             Int
+  publishedAt           DateTime
+  updatedAt             DateTime
+}
+
+model playlist_videos {
+  videoId    String
+  playlistId String
+  playlists  playlists @relation(fields: [playlistId], references: [id])
+  videos     videos    @relation(fields: [videoId], references: [id])
+
+  @@id([videoId, playlistId])
+}
+
+model playlists {
+  id              String            @id
+  publishedAt     DateTime
+  channelId       String
+  title           String
+  description     String
+  defaultLanguage String?
+  playlist_videos playlist_videos[]
+  channels        channels          @relation(fields: [channelId], references: [id])
+}
+
+model tags {
+  id      String @id
+  videoId String
+  text    String
+  videos  videos @relation(fields: [videoId], references: [id])
+}
+
+model thumbnails {
+  id            String @id
+  urlDefault    String
+  widthDefault  Int
+  heightDefault Int
+  videoId       String
+  videos        videos @relation(fields: [videoId], references: [id])
+}
+
+model videos {
+  id              String            @id
+  publishedAt     DateTime
+  channelId       String
+  title           String
+  description     String
+  duration        Int?
+  dimension       String?
+  caption         Boolean?
+  licensedContent Boolean?
+  projection      String?
+  viewCount       Int?
+  likeCount       Int?
+  favoriteCount   Int?
+  commentCount    Int?
+  shortId         String?
+  playlist_videos playlist_videos[]
+  tags            tags[]
+  thumbnails      thumbnails[]
+  channels        channels          @relation(fields: [channelId], references: [id])
+}

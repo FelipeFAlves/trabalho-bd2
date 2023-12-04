@@ -15,7 +15,7 @@ export class ChannelsService {
     });
   }
 
-  async findAll():Promise<ChannelEntity[]> {
+  async findAll(): Promise<ChannelEntity[]> {
     return await this.prisma.channels.findMany();
   }
 

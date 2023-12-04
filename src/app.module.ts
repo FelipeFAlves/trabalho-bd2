@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -16,4 +16,16 @@ import { ThumbnailsModule } from './thumbnails/thumbnails.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(corsMiddleware).forRoutes('*'); // Aplicar o middleware para todas as rotas
+  }
+}
+
+// Middleware CORS
+function corsMiddleware(req, res, next) {
+  res.header('Access-Control-Allow-Origin', 'http://localhost:3001'); // ou a origem da sua aplicação frontend
+  res.header('Access-Control-Allow-Methods', 'GET,HEAD,PUT,PATCH,POST,DELETE');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+}

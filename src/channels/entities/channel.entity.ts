@@ -1,11 +1,11 @@
 import { channels } from "@prisma/client";
 
-export class ChannelEntity implements channels {
+export interface ChannelEntity {
     id: string;
     title: string;
     description: string;
     customUrl: string;
     publishedAt: Date;
-    viewCount: bigint;
-    subscriberCount: bigint;
-}
+    viewCount: string; // Alterado para string
+    subscriberCount: string; // Alterado para string
+  }

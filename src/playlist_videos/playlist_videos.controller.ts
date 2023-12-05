@@ -3,7 +3,7 @@ import { PlaylistVideosService } from './playlist_videos.service';
 import { CreatePlaylistVideoDto } from './dto/create-playlist_video.dto';
 import { UpdatePlaylistVideoDto } from './dto/update-playlist_video.dto';
 
-@Controller('playlist-videos')
+@Controller('playlist_videos')
 export class PlaylistVideosController {
   constructor(private readonly playlistVideosService: PlaylistVideosService) {}
 
@@ -17,9 +17,9 @@ export class PlaylistVideosController {
     return this.playlistVideosService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.playlistVideosService.findOne(+id);
+  @Get(':videoId/:playlistId')
+  findOne(@Param('videoId') videoId: string, @Param('playlistId') playlistId: string) {
+    return this.playlistVideosService.findOne(videoId, playlistId);
   }
 
   @Patch(':id')

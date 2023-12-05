@@ -3,6 +3,7 @@ import { CreateVideoDto } from './dto/create-video.dto';
 import { UpdateVideoDto } from './dto/update-video.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { VideoEntity } from './entities/video.entity';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class VideosService {
@@ -13,94 +14,18 @@ export class VideosService {
       data:createVideoDto,
     });
   }
-  async findAll(queryParams: any): Promise<VideoEntity[]> {
-    const where: any = {}; // Objeto que armazenará as condições de pesquisa
-  
-    if (queryParams.id) {
-      where.id = queryParams.id;
-    }
-  
-    if (queryParams.channelId) {
-      where.channelId = queryParams.channelId;
-    }
-  
-    if (queryParams.title) {
-      where.title = queryParams.title;
-    }
-  
-    if (queryParams.description) {
-      where.description = queryParams.description;
-    }
-  
-    if (queryParams.shortId) {
-      where.shortId = queryParams.shortId;
-    }
-  
-    if (queryParams.publishedAt) {
-      where.publishedAt = queryParams.publishedAt;
-    }
-  
-    return this.prisma.videos.findMany({
-      where,
-    });
+
+  async findAll(): Promise<VideoEntity[]> {
+    return await this.prisma.videos.findMany();
   }
-  // async findAll(): Promise<VideoEntity[]> {
-  //   return await this.prisma.videos.findMany();
-  // }
 
   async findOne(id: any): Promise<VideoEntity> {
-    console.log(id);
-    return this.prisma.videos.findFirst({
+    return this.prisma.videos.findUnique({
       where:{
         id,
       },
     }) 
   }
-
-  async findChannel(channelId: any): Promise<VideoEntity[]> {
-    return this.prisma.videos.findMany({
-      where:{
-        channelId,
-      },
-    }) 
-  }
-
-  async findTitle(title: any): Promise<VideoEntity[]> {
-    console.log(title);
-    return this.prisma.videos.findMany({
-      where:{
-        title,
-      },
-    }) 
-  }
-
-  async findDescription(description: any): Promise<VideoEntity[]> {
-    console.log(description);
-    return this.prisma.videos.findMany({
-      where:{
-        description,
-      },
-    }) 
-  }
-
-  async findShortId(shortId: any): Promise<VideoEntity[]> {
-    console.log(shortId);
-    return this.prisma.videos.findMany({
-      where:{
-        shortId,
-      },
-    }) 
-  }
-
-  async findPubli(publishedAt: any): Promise<VideoEntity[]> {
-    console.log(publishedAt);
-    return this.prisma.videos.findMany({
-      where:{
-        publishedAt,
-      },
-    }) 
-  }
-  
 
   async update(id: any, updateVideoDto: UpdateVideoDto): Promise<VideoEntity> {
     return this.prisma.videos.update({
@@ -118,4 +43,106 @@ export class VideosService {
       },
     })
   }
+
+  async searchVideos(query: any): Promise<any> {
+    try {
+      console.log('Recebendo consulta com os seguintes parâmetros:', query);
+      let inputValuesObject;
+      let whereConditions: any = {}; // Inicializa um objeto vazio para as condições where
+      let orderByField;
+      let orderByDirection;
+  
+      // Se houver atributos selecionados, construa a cláusula where
+      if (query.filterAttributes.length > 0) {
+        const attributesArray = query.filterAttributes.split(','); // Converte a string em um array
+        console.log('String:', query.filterAttributes);
+        console.log('Array:', attributesArray);
+        console.log('values:', query.inputValues);
+        inputValuesObject = JSON.parse(query.inputValues);
+
+        console.log('values:', inputValuesObject);
+        
+        if(query.conditional==='and'){
+          whereConditions = {
+            AND: attributesArray.map((attr: string) => ({
+              [attr]: {
+                equals: inputValuesObject[attr], // Adapte conforme necessário
+              },
+            })),
+          };
+        }
+        else{
+          whereConditions = {
+            OR: attributesArray.map((attr: string) => ({
+                [attr]: {
+                    equals: inputValuesObject[attr], // Adapte conforme necessário
+                },
+            })),
+          };
+        }
+        
+      }
+      
+      
+      if (query.selectedAttributes.length > 0) {
+        const selectedAttributes = query.selectedAttributes.split(','); // Convertendo para array
+        console.log('Select:', selectedAttributes);
+
+        if(query.conditional==='and'){
+          selectedAttributes.forEach((selectedAttribute: string) => {
+            whereConditions = {
+                ...whereConditions,
+                [selectedAttribute]: {
+                    equals: inputValuesObject[selectedAttribute],
+                },
+            };
+        });
+
+        }
+        else{
+          selectedAttributes.forEach((selectedAttribute: string) => {
+            whereConditions = {
+              ...whereConditions,
+              OR: [
+                  ...(whereConditions.OR || []),
+                  {
+                      [selectedAttribute]: {
+                          equals: inputValuesObject[selectedAttribute],
+                      },
+                  },
+              ],
+          };
+        });
+        }
+
+        orderByField = query.selectedReturnAttribute;
+        orderByDirection = query.orderBy.toLowerCase(); // Convert
+        // Se ambos existirem, aplicamos à consulta
+    console.log('field:', orderByField);
+    console.log('opaaa String:', orderByDirection);
+      }
+
+      
+      // Exemplo básico de consulta
+      const result = await this.prisma.videos.findMany({
+        where: whereConditions,
+        select: {
+          id: query.filterAttributes.includes('id'),
+          title: query.filterAttributes.includes('title'),
+          description: query.filterAttributes.includes('description'),
+          publishedAt: query.filterAttributes.includes('publishedAt'),
+          channelId: query.filterAttributes.includes('channelId'),
+          shortId: query.filterAttributes.includes('shortId'),
+        },
+        orderBy: orderByDirection !== 'none' ? { [orderByField]: orderByDirection } : undefined,
+        
+        take: parseInt(query.limit) || undefined,
+      });
+      console.log('Resultado da consulta:', result);
+  
+      return result;
+    } catch (error) {
+      throw new Error('Erro ao buscar dados.');
+    }
+}
 }

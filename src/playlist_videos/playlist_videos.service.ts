@@ -19,18 +19,20 @@ export class PlaylistVideosService {
     return await this.prisma.playlist_videos.findMany();
   }
 
-  async findOne(id: any)
-  // :Promise<playlist_videos> 
-  {
-    // const aa = this.prisma.playlist_videos.findMany({
-    //   where:{
-    //     id:{
-    //       videoId:id,
-    //       playlistId:id
-    //     }
-    //   },
-    // })
-    return "ERRO NESSE";
+  async findOne(videoId: string, playlistId: string): Promise<playlist_videos | null> {
+    try {
+      const result = await this.prisma.playlist_videos.findFirst({
+        where: {
+          videoId,
+          playlistId,
+        },
+      });
+      return result;
+    } catch (error) {
+      // Lide com o erro aqui
+      console.error('Erro ao buscar dados:', error);
+      throw new Error('Erro ao buscar dados.');
+    }
   }
 
   async update(id: any, updatePlaylistVideoDto: UpdatePlaylistVideoDto)
@@ -55,4 +57,6 @@ export class PlaylistVideosService {
     // })
     return "Outro erro..."
   }
+
+  
 }

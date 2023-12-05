@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete , Query } from '@nestjs/common';
 import { ChannelsService } from './channels.service';
 import { CreateChannelDto } from './dto/create-channel.dto';
 import { UpdateChannelDto } from './dto/update-channel.dto';
@@ -16,6 +16,16 @@ export class ChannelsController {
   findAll() {
     console.log('aaaa')
     return this.channelsService.findAll();
+  }
+
+  @Get('search')
+  async searchVideos(@Query() query: any) {
+    try {
+      const result = await this.channelsService.searchChannels(query);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: 'Erro ao buscar dados.' };
+    }
   }
 
   @Get(':id')

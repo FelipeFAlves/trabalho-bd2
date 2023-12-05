@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { CreateCommentDto } from './dto/create-comment.dto';
 import { UpdateCommentDto } from './dto/update-comment.dto';
@@ -15,6 +15,16 @@ export class CommentsController {
   @Get()
   findAll() {
     return this.commentsService.findAll();
+  }
+
+  @Get('search')
+  async searchVideos(@Query() query: any) {
+    try {
+      const result = await this.commentsService.searchPlaylist(query);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: 'Erro ao buscar dados.' };
+    }
   }
 
   @Get(':id')

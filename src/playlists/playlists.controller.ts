@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
 import { PlaylistsService } from './playlists.service';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
@@ -20,6 +20,16 @@ export class PlaylistsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.playlistsService.findOne(+id);
+  }
+
+  @Get('search')
+  async searchVideos(@Query() query: any) {
+    try {
+      const result = await this.playlistsService.searchPlaylist(query);
+      return { success: true, data: result };
+    } catch (error) {
+      return { success: false, error: 'Erro ao buscar dados.' };
+    }
   }
 
   @Patch(':id')

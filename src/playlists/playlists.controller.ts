@@ -17,11 +17,6 @@ export class PlaylistsController {
     return this.playlistsService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.playlistsService.findOne(+id);
-  }
-
   @Get('search')
   async searchVideos(@Query() query: any) {
     try {
@@ -31,6 +26,13 @@ export class PlaylistsController {
       return { success: false, error: 'Erro ao buscar dados.' };
     }
   }
+
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    return this.playlistsService.findOne(id);
+  }
+
+  
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePlaylistDto: UpdatePlaylistDto) {

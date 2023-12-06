@@ -46,7 +46,11 @@ export class VideosService {
 
   async searchVideos(query: any): Promise<any> {
     try {
+      
       console.log('Recebendo consulta com os seguintes parâmetros:', query);
+      if(query.selectedTable && !query.selectedAttribute && !query.filterAttributes){
+        console.log("aaaaaaaaaaa");
+      }
       let inputValuesObject;
       let whereConditions: any = {}; // Inicializa um objeto vazio para as condições where
       let orderByField;
@@ -66,7 +70,7 @@ export class VideosService {
           whereConditions = {
             AND: attributesArray.map((attr: string) => ({
               [attr]: {
-                equals: inputValuesObject[attr], // Adapte conforme necessário
+                equals: inputValuesObject[attr], 
               },
             })),
           };
@@ -75,7 +79,7 @@ export class VideosService {
           whereConditions = {
             OR: attributesArray.map((attr: string) => ({
                 [attr]: {
-                    equals: inputValuesObject[attr], // Adapte conforme necessário
+                    equals: inputValuesObject[attr], 
                 },
             })),
           };
@@ -138,7 +142,7 @@ export class VideosService {
         
         take: parseInt(query.limit) || undefined,
       });
-      console.log('Resultado da consulta:', result);
+      // console.log(!result);
   
       return result;
     } catch (error) {
